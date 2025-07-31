@@ -1,0 +1,9 @@
+/src/Backend/Test.Server.Test/bin
+/src/Backend/Test.Server.Test/obj
+/src/Backend/Test.Server/.vs
+/src/Backend/Test.Server/bin
+/src/Backend/Test.Server/logs
+/src/Backend/Test.Server/obj
+/src/Frontend/Test.Client/.vs
+/src/Frontend/Test.Client/bin
+/src/Frontend/Test.Client/obj

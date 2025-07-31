@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Test.Client": {
+      "commandName": "Project",
+      "commandLineArgs": "http://localhost:5000/"
+    }
+  }
+}
