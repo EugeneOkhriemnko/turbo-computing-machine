@@ -1,25 +1,29 @@
-﻿using Xunit;
-using Moq;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
+using Moq;
 using Test.Server.DTOs;
 using Test.Server.Models;
 using Test.Server.Repositories;
 using Test.Server.Services;
+using Xunit;
 
 public class ProductServiceTests
 {
     private readonly Mock<IProductRepository> _repoMock = new();
     private readonly Mock<IMapper> _mapperMock = new();
-    private readonly Mock<ILogger<ProductService>> _loggerMock = new();
+    private readonly Mock<ILogger<ProductService>> _productLoggerMock = new();
+    private readonly Mock<ILogger<PriceService>> _priceLoggerMock = new();
 
-    private ProductService CreateService() =>
-        new(_repoMock.Object, _mapperMock.Object, _loggerMock.Object);
+    private ProductService CreateProductService() =>
+        new(_repoMock.Object, _mapperMock.Object, _productLoggerMock.Object);
+
+    private PriceService CreatePriceService() =>
+        new(_repoMock.Object, _mapperMock.Object, _priceLoggerMock.Object);
 
     [Fact]
     public async Task AddProductAsync_ValidInput_ShouldSucceed()
     {
-        var service = CreateService();
+        var service = CreateProductService();
 
         _repoMock.Setup(r => r.AddProductAsync("Test")).ReturnsAsync(new Product { Id = 1, Name = "Test" });
         _mapperMock.Setup(m => m.Map<Product, ProductResponseDto>(It.IsAny<Product>()))
@@ -34,7 +38,7 @@ public class ProductServiceTests
     [Fact]
     public async Task AddPriceAsync_ValidInput_ShouldSucceed()
     {
-        var service = CreateService();
+        var service = CreatePriceService();
 
         _repoMock.Setup(r => r.AddPriceAsync(1, 100))
                  .ReturnsAsync(new PriceDetail { Id = 1, Price = 100 });
@@ -50,7 +54,7 @@ public class ProductServiceTests
     [Fact]
     public async Task UpdatePriceAsync_ValidInput_ShouldSucceed()
     {
-        var service = CreateService();
+        var service = CreatePriceService();
 
         _repoMock.Setup(r => r.UpdatePriceAsync(1, 120))
                  .ReturnsAsync(new PriceDetail { Id = 1, Price = 120 });
@@ -66,7 +70,7 @@ public class ProductServiceTests
     [Fact]
     public async Task DeleteProductAsync_ValidInput_ShouldSucceed()
     {
-        var service = CreateService();
+        var service = CreateProductService();
 
         _repoMock.Setup(r => r.DeleteProductAsync(1)).Returns(Task.CompletedTask);
 
@@ -77,9 +81,9 @@ public class ProductServiceTests
     [Fact]
     public async Task SearchByNameAsync_ValidInput_ShouldSucceed()
     {
-        var service = CreateService();
+        var service = CreateProductService();
 
-        _repoMock.Setup(r => r.SearchByNameAsync("milk"))
+        _repoMock.Setup(r => r.SearchProductsByNameAsync("milk"))
                  .ReturnsAsync(new List<Product> { new() { Id = 1, Name = "milk" } });
         _mapperMock.Setup(m => m.Map<IEnumerable<Product>, IEnumerable<ProductResponseDto>>(It.IsAny<IEnumerable<Product>>()))
                    .Returns(new List<ProductResponseDto> { new() { Id = 1, Name = "milk" } });
@@ -92,9 +96,9 @@ public class ProductServiceTests
     [Fact]
     public async Task SearchByPriceRangeAsync_ValidInput_ShouldSucceed()
     {
-        var service = CreateService();
+        var service = CreateProductService();
 
-        _repoMock.Setup(r => r.SearchByPriceRangeAsync(10, 50))
+        _repoMock.Setup(r => r.SearchProductsByPriceRangeAsync(10, 50))
                  .ReturnsAsync(new List<Product> { new() { Id = 1, Name = "test" } });
         _mapperMock.Setup(m => m.Map<IEnumerable<Product>, IEnumerable<ProductResponseDto>>(It.IsAny<IEnumerable<Product>>()))
                    .Returns(new List<ProductResponseDto> { new() { Id = 1, Name = "test" } });
@@ -107,7 +111,7 @@ public class ProductServiceTests
     [Fact]
     public async Task GetProductAsync_ValidId_ShouldReturnProduct()
     {
-        var service = CreateService();
+        var service = CreateProductService();
 
         _repoMock.Setup(r => r.GetProductAsync(1))
                  .ReturnsAsync(new Product { Id = 1, Name = "abc" });

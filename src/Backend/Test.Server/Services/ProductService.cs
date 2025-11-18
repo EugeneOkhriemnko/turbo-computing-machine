@@ -25,49 +25,11 @@ public class ProductService(
                 _logger.LogWarning("Product name cannot be null or empty.");
                 throw new ArgumentException("Product name cannot be null or empty.", nameof(name));
             }
-            return _mapper.Map <Product, ProductResponseDto>(await _repository.AddProductAsync(name));
+            return _mapper.Map<Product, ProductResponseDto>(await _repository.AddProductAsync(name));
         }
         catch
         {
             _logger.LogError("Error occurred while adding product with name: {productName}", name);
-            throw;
-        }
-    }
-
-    public async Task<PriceDetailResponseDto> AddPriceAsync(int productId, decimal price)
-    {
-        try
-        {
-            _logger.LogInformation("Adding price {price} for product ID {productId}", price, productId);
-            if (price <= 0)
-            {
-                _logger.LogWarning("Price must be greater than zero.");
-                throw new ArgumentException("Price must be greater than zero.", nameof(price));
-            }
-            return _mapper.Map<PriceDetail, PriceDetailResponseDto>(await _repository.AddPriceAsync(productId, price));
-        }
-        catch
-        {
-            _logger.LogError("Error occurred while adding price {price} for product ID {productId}", price, productId);
-            throw;
-        }
-    }
-
-    public async Task<PriceDetailResponseDto> UpdatePriceAsync(int priceId, decimal newPrice)
-    {
-        try
-        {
-            _logger.LogInformation("Updating price ID {priceId} to new price {newPrice}", priceId, newPrice);
-            if (newPrice <= 0)
-            {
-                _logger.LogWarning("New price must be greater than zero.");
-                throw new ArgumentException("New price must be greater than zero.", nameof(newPrice));
-            }
-            return _mapper.Map<PriceDetail, PriceDetailResponseDto>(await _repository.UpdatePriceAsync(priceId, newPrice));
-        }
-        catch
-        {
-            _logger.LogError("Error occurred while updating price ID {priceId} to new price {newPrice}", priceId, newPrice);
             throw;
         }
     }
@@ -102,7 +64,7 @@ public class ProductService(
                 throw new ArgumentException("Search name cannot be null or empty.", nameof(name));
             }
             return _mapper.Map<IEnumerable<Product>, IEnumerable<ProductResponseDto>>(
-                await _repository.SearchByNameAsync(name));
+                await _repository.SearchProductsByNameAsync(name));
         }
         catch
         {
@@ -122,7 +84,7 @@ public class ProductService(
                 throw new ArgumentException("Invalid price range.", nameof(min));
             }
             return _mapper.Map<IEnumerable<Product>, IEnumerable<ProductResponseDto>>(
-                await _repository.SearchByPriceRangeAsync(min, max));
+                await _repository.SearchProductsByPriceRangeAsync(min, max));
         }
         catch
         {

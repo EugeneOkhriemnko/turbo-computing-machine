@@ -9,9 +9,10 @@ namespace Test.Server.Controllers;
 [ApiController]
 [Route("api/products")]
 [Authorize]
-public class ProductController(IProductService service, ILogger<ProductController> logger) : Controller
+public class ProductController(IProductService productService, IPriceService priceService, ILogger<ProductController> logger) : Controller
 {
-    private readonly IProductService _service = service;
+    private readonly IProductService _productService = productService;
+    private readonly IPriceService _priceService = priceService;
     private readonly ILogger<ProductController> _logger = logger;
 
     [HttpPost]
@@ -23,7 +24,7 @@ public class ProductController(IProductService service, ILogger<ProductControlle
         try
         {
             _logger.LogInformation("Adding product with name: {productName}", dto.Name);
-            var product = await _service.AddProductAsync(dto.Name);
+            var product = await _productService.AddProductAsync(dto.Name);
             return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
         }
         catch (Exception ex)
@@ -42,7 +43,7 @@ public class ProductController(IProductService service, ILogger<ProductControlle
         try
         {
             _logger.LogInformation("Fetching product with ID: {productId}", id);
-            var product = await _service.GetProductAsync(id);
+            var product = await _productService.GetProductAsync(id);
             return Ok(product);
         }
         catch (Exception ex)
@@ -61,7 +62,7 @@ public class ProductController(IProductService service, ILogger<ProductControlle
         try
         {
             _logger.LogInformation("Adding price for product ID: {productId} with price: {price}", productId, dto.Price);
-            var price = await _service.AddPriceAsync(productId, dto.Price);
+            var price = await _priceService.AddPriceAsync(productId, dto.Price);
             return Ok(price);
         }
         catch (ArgumentException ex)
@@ -85,7 +86,7 @@ public class ProductController(IProductService service, ILogger<ProductControlle
         try
         {
             _logger.LogInformation("Updating price ID: {priceId} to new price: {newPrice}", priceId, dto.Price);
-            var price = await _service.UpdatePriceAsync(priceId, dto.Price);
+            var price = await _priceService.UpdatePriceAsync(priceId, dto.Price);
             return Ok(price);
         }
         catch (KeyNotFoundException ex)
@@ -114,7 +115,7 @@ public class ProductController(IProductService service, ILogger<ProductControlle
         try
         {
             _logger.LogInformation("Deleting product with ID: {productId}", id);
-            await _service.DeleteProductAsync(id);
+            await _productService.DeleteProductAsync(id);
             return NoContent();
         }
         catch (KeyNotFoundException ex)
@@ -131,7 +132,7 @@ public class ProductController(IProductService service, ILogger<ProductControlle
         {
             _logger.LogError(ex, "Error deleting product with ID: {productId}", id);
             return StatusCode(500, "Internal server error");
-        }        
+        }
     }
 
     [HttpGet("search/{name}")]
@@ -143,7 +144,7 @@ public class ProductController(IProductService service, ILogger<ProductControlle
         try
         {
             _logger.LogInformation("Searching products by name: {productName}", name);
-            var products = await _service.SearchByNameAsync(name);
+            var products = await _productService.SearchByNameAsync(name);
             return Ok(products);
         }
         catch (ArgumentException ex)
@@ -168,7 +169,7 @@ public class ProductController(IProductService service, ILogger<ProductControlle
         try
         {
             _logger.LogInformation("Searching products by price range: {minPrice} - {maxPrice}", min, max);
-            var products = await _service.SearchByPriceRangeAsync(min, max);
+            var products = await _productService.SearchByPriceRangeAsync(min, max);
             return Ok(products);
         }
         catch (Exception ex)

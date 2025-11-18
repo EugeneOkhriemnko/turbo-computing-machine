@@ -10,24 +10,6 @@ public class ProductRepository(DataContext context, ILogger<ProductRepository> l
     private readonly DataContext _context = context;
     private ILogger<ProductRepository> _logger = logger;
 
-    public async Task<Product> AddProductAsync(string name)
-    {
-        try
-        {
-            _logger.LogInformation("Adding product: {ProductName}", name);
-            var product = new Product { Name = name };
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("Product added successfully: {ProductId}", product.Id);
-            return product;
-        }
-        catch(Exception ex)
-        {
-            _logger.LogError(ex, "Error adding product: {ProductName}", name);
-            throw;
-        }
-    }
-
     public async Task<PriceDetail> AddPriceAsync(int productId, decimal price)
     {
         try
@@ -80,6 +62,64 @@ public class ProductRepository(DataContext context, ILogger<ProductRepository> l
         }
     }
 
+    public async Task<IList<PriceDetail>> GetProductPricesAsync(int productId)
+    {
+        try
+        {
+            _logger.LogInformation("Loading prices for product with ID {productId}", productId);
+            var prices = await _context.PriceDetails.Where(x => x.ProductId == productId).ToListAsync();
+            if (!prices.Any())
+            {
+                _logger.LogWarning("No prices found for product with ID {productId}.", productId);
+                throw new KeyNotFoundException($"No prices found for product with ID {productId}.");
+            }
+            return prices ?? [];
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving prices for product with ID {productId}", productId);
+            throw;
+        }
+    }
+
+    public async Task DeletePriceAsync(int priceId)
+    {
+        try
+        {
+            var price = await _context.PriceDetails.FindAsync(priceId);
+            if (price is null)
+            {
+                _logger.LogWarning("Price with ID {priceId} not found.", priceId);
+                throw new KeyNotFoundException($"Price with ID {priceId} not found.");
+            }
+            _context.PriceDetails.Remove(price);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting price with ID {priceId}", priceId);
+            throw;
+        }
+    }
+
+    public async Task<Product> AddProductAsync(string name)
+    {
+        try
+        {
+            _logger.LogInformation("Adding product: {ProductName}", name);
+            var product = new Product { Name = name };
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("Product added successfully: {ProductId}", product.Id);
+            return product;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding product: {ProductName}", name);
+            throw;
+        }
+    }
+
     public async Task DeleteProductAsync(int productId)
     {
         try
@@ -101,7 +141,7 @@ public class ProductRepository(DataContext context, ILogger<ProductRepository> l
         }
     }
 
-    public async Task<IEnumerable<Product>> SearchByNameAsync(string name)
+    public async Task<IEnumerable<Product>> SearchProductsByNameAsync(string name)
     {
         try
         {
@@ -119,7 +159,7 @@ public class ProductRepository(DataContext context, ILogger<ProductRepository> l
         }
     }
 
-    public async Task<IEnumerable<Product>> SearchByPriceRangeAsync(decimal min, decimal max)
+    public async Task<IEnumerable<Product>> SearchProductsByPriceRangeAsync(decimal min, decimal max)
     {
         try
         {
