@@ -1,4 +1,5 @@
 ﻿using Test.Server.DTOs;
+using Test.Server.Models;
 
 namespace Test.Server.Services
 {
@@ -8,6 +9,6 @@ namespace Test.Server.Services
         Task<PriceDetailResponseDto> AddPriceAsync(int productId, decimal price);
         Task<PriceDetailResponseDto> UpdatePriceAsync(int priceId, decimal newPrice);
         Task DeletePriceAsync(int priceId);
-        Task<IList<PriceDetailResponseDto>> EvaluatePricesAsync(int productId, string segment);
+        Task<IList<PriceDetail>> EvaluatePricesAsync(int productId, string segment);
     }
 }

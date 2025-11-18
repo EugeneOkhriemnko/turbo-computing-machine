@@ -74,14 +74,14 @@ namespace Test.Server.Services
             }
         }
 
-        public virtual async Task<IList<PriceDetailResponseDto>> EvaluatePricesAsync(int productId, string segment)
+        public virtual async Task<IList<PriceDetail>> EvaluatePricesAsync(int productId, string segment)
         {
             _logger.LogInformation("Retrieving prices for product ID {productId}", productId);
             var prices = await _repository.GetProductPricesAsync(productId);
 
             prices = [.. prices.Where(p => p.Segment == segment)];
 
-            return _mapper.Map<IList<PriceDetail>, IList<PriceDetailResponseDto>>(prices ?? []);
+            return prices;
         }
 
         public virtual async Task<IList<PriceDetailResponseDto>> GetPricesByProductAsync(int productId)
